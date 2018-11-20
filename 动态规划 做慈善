@@ -1,0 +1,78 @@
+/*1502.做慈善 (20分) 
+C时间限制：3000 毫秒 |  C内存限制：3000 Kb
+题目内容：
+捐款站有个点名机，每个时刻会报一个数，下一刻的报数相对于上一刻可能是加1, 或者减1,或者保持不变。点名机从0开始报数，限制在[0,100]之间。
+N位富商带着钱去捐款，如果某人到达捐款站时，捐款站的点名机刚好报出他的身份号码，则他会捐出他带的财富，否则他不捐款。
+请你安排一个点名机的报数，使得捐款站收到最多捐款。
+ 输入描述
+第一行是整数N,1<=N<=100 ,
+以下N行分别是每个富商的到达时间t[i],带的钱P[i],以及身份号码S[i], 满足0<=t[i]<=30000,0<=P[i]<=300,1<=S[i]<=K
+ 输出描述
+捐款站收到的钱的最大总数
+ 输入样例
+4
+10 10 10
+16 11 7
+8 15 1
+16 1 8
+输出样例s
+26*/
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+
+using namespace std;
+
+struct node{
+ 	int money;
+	int num;
+	int time;
+}a[1001];
+bool cmp(node x,node y){
+	return x.time < y.time;
+}
+bool check(node x,node y){
+	return x.time - y.time >= abs(x.num - y.num) ? 1 : 0;
+}
+int dp[1001] = {0};
+
+int main(){
+
+	int n,res = 0;
+	cin >> n;
+	for(int i = 0; i < n; i++){
+		cin >> a[i].time >> a[i].money >> a[i].num;
+	}
+	sort(a,a+n,cmp);
+	//输出排序结果 
+    cout<<endl;
+	for(int i=0;i<n;i++)cout<<a[i].time<<" "<<a[i].money<<" "<<a[i].num<<endl;cout<<endl;
+	/*排序后 
+	8 15 1
+	10 10 10
+	16 11 7
+	16 1 8
+	dp[i]表示，第i个人一定会捐的最大收益，在此基础上，选择前面的情况中捐款数最大的，即max(dp[0:i-1])，跟在其后 
+	当i=0时，里层for跳过， 
+							   	time:8,num:1,dp[0]=tmp:0+money:15=15,res=15
+	当i=1时，check(a[1],a[0:0])timec:2 numc:9,不满足,即第0个和第1个排斥， 
+							   	time:10,num:10,dp[1]=tmp:0+money:10=10,res=15
+	当i=2时，check(a[2],a[0:1])timec:8 numc:6,满足，可以跟在0的后面 
+							   timec:6 numc:3,满足，也可以跟在1的后面 
+							   	time:16,num:7,dp[2]=tmp:15+money:11=26,res=26，选择跟在收益最大的后面 
+	当i=3时，check(a[3],a[0:2])timec:8 numc:7,满足，可以跟在0后面 
+							   timec:6 numc:2,满足，也可以跟在1后面 
+							   timec:0 numc:1,不满足
+							   	time:16,num:8,dp[3]=tmp:15+money:1=16,res=26							    					    
+	*/ 
+	for(int i = 0; i < n; i++){
+		int tmp = 0;
+		for(int j = 0; j < i; j++)
+			if(check(a[i],a[j]) && tmp < dp[j])//a[j]可以在a[i]后面 
+				tmp = dp[j];//存最大收益		
+		
+		if(a[i].time>=a[i].num)dp[i] = tmp +a[i].money;
+		if(res <dp[i]) res=dp[i];
+	}
+	cout << res << endl;
+}
